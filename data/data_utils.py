@@ -51,8 +51,8 @@ def noisy_circle(
 
 def show_circle(img: np.ndarray):
     fig, ax = plt.subplots()
-    ax.imshow(img, cmap='gray')
-    ax.set_title('Circle')
+    ax.imshow(img, cmap="gray")
+    ax.set_title("Circle")
     plt.show()
 
 
@@ -61,7 +61,7 @@ def generate_examples(
     img_size: int = 100,
     min_radius: Optional[int] = None,
     max_radius: Optional[int] = None,
-    dataset_path: str = 'ds',
+    dataset_path: str = "ds",
 ) -> Generator[Tuple[np.ndarray, CircleParams], None, None]:
     if not min_radius:
         min_radius = img_size // 10
@@ -73,7 +73,9 @@ def generate_examples(
 
     while True:
         img, params = noisy_circle(
-            img_size=img_size, min_radius=min_radius, max_radius=max_radius, noise_level=noise_level
+            img_size=img_size,
+            min_radius=min_radius,
+            max_radius=max_radius,
+            noise_level=noise_level,
         )
         yield img, params
-

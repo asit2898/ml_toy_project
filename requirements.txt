@@ -1,2 +1,5 @@
 pytorch-lightning==1.9.4
 wandb==0.13.11
+matplotlib==3.7.
+scikit_image==0.20.0
+tensorboard==2.12.0clear
