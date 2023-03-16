@@ -118,7 +118,9 @@ class Config(BaseConfig):
         self.ckpt_path = ""
         self.model_type = ""  # Choose between bi-encoder, cross-encoder
         self.cross_enc_type = "default"
-        self.bi_enc_type = "separate"  # Use "separate" encoder for query/input/mention and label/entity or "shared" encoder
+        self.bi_enc_type = (
+            "separate"
+        )  # Use "separate" encoder for query/input/mention and label/entity or "shared" encoder
         self.bert_model = ""  # Choose type of bert model - bert-uncased-small etc
         self.bert_args = {}  # Some arguments to pass to bert-model when initializing
         self.lowercase = True  # Use lowercase BERT tokenizer

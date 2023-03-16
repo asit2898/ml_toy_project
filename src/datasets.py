@@ -43,7 +43,10 @@ class TrainDataSet(Dataset):
             max_radius=self.max_radius,
             noise_level=self.noise_level,
         )
-        return torch.tensor(img, dtype=torch.float64), torch.tensor([circle.row, circle.col, circle.radius], dtype=torch.float64)
+        return (
+            torch.tensor(img, dtype=torch.float64),
+            torch.tensor([circle.row, circle.col, circle.radius], dtype=torch.float64),
+        )
 
 
 class ValDataSet(Dataset):
@@ -63,7 +66,10 @@ class ValDataSet(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        return torch.tensor(self.images[idx], dtype=torch.float64), torch.tensor(self.circles[idx], dtype=torch.float64)
+        return (
+            torch.tensor(self.images[idx], dtype=torch.float64),
+            torch.tensor(self.circles[idx], dtype=torch.float64),
+        )
 
 
 class TestDataSet(Dataset):
@@ -83,4 +89,7 @@ class TestDataSet(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        return torch.tensor(self.images[idx], dtype=torch.float64), torch.tensor(self.circles[idx], dtype=torch.float64)
+        return (
+            torch.tensor(self.images[idx], dtype=torch.float64),
+            torch.tensor(self.circles[idx], dtype=torch.float64),
+        )

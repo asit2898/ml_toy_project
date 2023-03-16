@@ -8,11 +8,13 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 from models.simple_cnn import SimpleCNN
 from utils.utils import circle_prediction_accuracy
+from utils.cmd_args import CircleDetectorParser
 from data.data_utils import noisy_circle
 
 ###
 import wandb
 from datasets import TrainDataSet, ValDataSet, TestDataSet
+import argparse
 
 
 """
@@ -25,10 +27,11 @@ TODO: Add the following paramters to the config file:
 
 
 class CircleDetector(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, iou_threshold=0.5, lr=1e-3):
         super(CircleDetector, self).__init__()
         self.model = SimpleCNN()
-        self.params = {"iou_threshold": 0.5}
+        self.iou_threshold = iou_threshold
+        self.lr = lr
 
     def training_step(self, batch, batch_idx):
         """
@@ -45,7 +48,7 @@ class CircleDetector(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         return optimizer
 
     def validation_step(self, batch, batch_idx):
@@ -59,7 +62,7 @@ class CircleDetector(pl.LightningModule):
 
         # Calculate accuracy based on IOU
         accuracy = circle_prediction_accuracy(
-            threshold=self.params["iou_threshold"], circlesA=y_predicted, circlesB=y
+            threshold=self.iou_threshold, circlesA=y_predicted, circlesB=y
         )
 
         return {"val_loss": val_loss, "val_acc": accuracy}
@@ -89,7 +92,7 @@ class CircleDetector(pl.LightningModule):
         y_hat = self.model(x)
 
         accuracy = circle_prediction_accuracy(
-            threshold=self.params["iou_threshold"], circlesA=y_hat, circlesB=y
+            threshold=self.iou_threshold, circlesA=y_hat, circlesB=y
         )
         return {"test_acc": accuracy}
 
@@ -104,15 +107,14 @@ class CircleDetector(pl.LightningModule):
 
 if __name__ == "__main__":
 
-    train_batch_size = 32
-    val_batch_size = 32
-    save_model_path = "outputs/models"
-    save_top_k = 1
-    accelerator = "cpu"
-    devices = 1
-    max_epochs = 100
-    val_check_interval = 0.25
-    use_wandb = False
+    parser = CircleDetectorParser()
+    parser.add_args()
+    args = parser.parse_args()
+
+    if args.get("config_file") and os.path.exists(args.get("config_file")):
+        pass
+
+    pl.seed_everything(seed)
 
     if use_wandb:
         wandb.init()
@@ -122,7 +124,8 @@ if __name__ == "__main__":
 
     # Create dataloaders
     train_dataloader = DataLoader(
-        TrainDataSet(epoch_length=50000), batch_size=train_batch_size
+        TrainDataSet(epoch_length=train_epoch_length, noise_level=0.5),
+        batch_size=train_batch_size,
     )
     val_dataloader = DataLoader(ValDataSet(), batch_size=val_batch_size)
     test_dataloader = DataLoader(TestDataSet(), batch_size=val_batch_size)
@@ -147,7 +150,7 @@ if __name__ == "__main__":
 
     # Create trainer
 
-    model = CircleDetector()
+    model = CircleDetector(iou_threshold=iou_threshold, lr=lr)
 
     trainer = pl.Trainer(
         accelerator=accelerator,
@@ -156,16 +159,25 @@ if __name__ == "__main__":
         max_epochs=max_epochs,
         val_check_interval=val_check_interval,
         fast_dev_run=True,
-        precision=64
+        precision=64,
     )
 
     # Train model
-    trainer.fit(
-        model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader
-    )
+    if mode == "train":
+        trainer.fit(
+            model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader
+        )
 
     # Get test metrics on best model
-    best_model_path = checkpoint_callback.best_model_path
+    if mode == "train":
+        best_model_path = checkpoint_callback.best_model_path
+
+    if mode == "test":
+        if model_path == None:
+            raise ValueError("model_path not specified")
+        else:
+            best_model_path = model_path
+
     trained_model = CircleDetector.load_from_checkpoint(best_model_path)
 
     results = trainer.test(model=trained_model, dataloaders=test_dataloader)
