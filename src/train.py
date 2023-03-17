@@ -56,7 +56,7 @@ class CircleDetector(pl.LightningModule):
 
         return {"val_loss": val_loss, "val_acc": accuracy}
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         # Aggregate metrics from all validation batches
 
         outputs_tensor = torch.stack(
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         callbacks=[checkpoint_callback, early_stop_callback],
         max_epochs=args.max_epochs,
         val_check_interval=args.val_check_interval,
-        fast_dev_run=True,
+        fast_dev_run=args.fast_dev_run,
         precision=64,
     )
 

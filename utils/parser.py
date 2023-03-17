@@ -53,6 +53,13 @@ class CircleDetectorParser(ArgumentParser):
         parser = self.add_argument_group("Arguments")
 
         parser.add_argument(
+            "--fast_dev_run",
+            type=bool,
+            default=False,
+            help="Runs pytroch lightning's fast_dev_run for debugging using single batch",
+        )
+
+        parser.add_argument(
             "--train_batch_size", type=int, default=32, help="Batch size for training"
         )
         parser.add_argument(
