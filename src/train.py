@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn.functional as F
+import numpy as np
 
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
@@ -21,6 +22,9 @@ class CircleDetector(pl.LightningModule):
         self.model = SimpleCNN()
         self.iou_threshold = iou_threshold
         self.lr = lr
+        self.val_losses = []
+        self.val_accs = []
+        self.test_accs = []
 
     def training_step(self, batch, batch_idx):
         """
@@ -45,7 +49,7 @@ class CircleDetector(pl.LightningModule):
         x, y = batch
         x = x.unsqueeze(1)
         y_predicted = self.model(x)
-        val_loss = F.mse_loss(y_predicted, y)
+        val_loss = F.mse_loss(y_predicted, y).item()
 
         self.log("val/loss", val_loss)
 
@@ -54,21 +58,18 @@ class CircleDetector(pl.LightningModule):
             threshold=self.iou_threshold, circlesA=y_predicted, circlesB=y
         )
 
+        self.val_losses.append(val_loss)
+        self.val_accs.append(accuracy)
+
         return {"val_loss": val_loss, "val_acc": accuracy}
 
-    def on_validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         # Aggregate metrics from all validation batches
+        avg_loss = np.array(self.val_losses).mean().item()
+        avg_acc = np.array(self.val_accs).mean().item()
 
-        outputs_tensor = torch.stack(
-            [
-                torch.tensor([output["val_loss"], output["val_acc"]])
-                for output in outputs
-            ]
-        )
-        avg_output = torch.mean(outputs_tensor, dim=0)
-
-        avg_loss = avg_output[0].item()
-        avg_acc = avg_output[1].item()
+        self.val_losses.clear()
+        self.val_accs.clear()
 
         self.log("val/loss", avg_loss)
         self.log("val/acc", avg_acc)
@@ -83,14 +84,17 @@ class CircleDetector(pl.LightningModule):
         accuracy = circle_prediction_accuracy(
             threshold=self.iou_threshold, circlesA=y_hat, circlesB=y
         )
+
+        self.test_accs.append(accuracy)
+
         return {"test_acc": accuracy}
 
-    def test_epoch_end(self, outputs):
+    def on_test_epoch_end(self):
         # Aggregate test metrics
 
-        avg_accuracy = (
-            torch.stack([output["test_acc"] for output in outputs]).mean().item()
-        )
+        avg_accuracy = np.array(self.test_accs).mean().item()
+        self.test_accs.clear()
+
         self.log("test/acc", avg_accuracy)
 
 
@@ -117,7 +121,7 @@ if __name__ == "__main__":
     if args.use_wandb:
         wandb.init()
         logger = WandbLogger(project="circle-detection", log_model=True)
-        logger.experiment.config.update(**vars(args))
+        wandb.log({"Args": json.dumps(vars(args))})
     else:
         logger = TensorBoardLogger(args.save_model_path, name="my_model")
         logger.log_hyperparams(params=vars(args))
