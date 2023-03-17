@@ -175,3 +175,10 @@ class CircleDetectorParser(ArgumentParser):
             default=None,
             help="Name of the wandb project to log to",
         )
+
+        parser.add_argument(
+            "--num_workers",
+            type=int,
+            default=4,
+            help="Number of workers to use for dataloading",
+        )
