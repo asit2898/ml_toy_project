@@ -17,5 +17,6 @@
     "output_path": "outputs",
 	"noise_level": 0.5,
     "wandb_project_name": "circle_detector",
-    "num_workers": 16
+    "num_workers": 16,
+    "patience": 4
 }

@@ -107,6 +107,10 @@ class CircleDetectorParser(ArgumentParser):
 
         parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
 
+        parser.add_argument(
+            "--patience", type=int, default=1, help="Patience for early stopping"
+        )
+
     def add_other_args(self):
         """
         Adds all other arguments to the parser

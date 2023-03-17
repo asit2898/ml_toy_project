@@ -152,7 +152,11 @@ if __name__ == "__main__":
     )
 
     early_stop_callback = pl.callbacks.EarlyStopping(
-        monitor="val/acc", min_delta=0.00, patience=3, verbose=False, mode="max"
+        monitor="val/acc",
+        min_delta=0.00,
+        patience=args.patience,
+        verbose=False,
+        mode="max",
     )
 
     # Create trainer
