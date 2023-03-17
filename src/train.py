@@ -108,7 +108,7 @@ if __name__ == "__main__":
     parser.add_args()
 
     args = parser.parse_args()
-    print(f"Arguments used: \n", args)
+    print(f"Arguments used: \n", vars(args))
 
     if args.save_model_path:
         if not os.path.exists(args.save_model_path):
@@ -118,13 +118,9 @@ if __name__ == "__main__":
         if not os.path.exists(args.output_path):
             os.makedirs(args.output_path)
 
-    if args.use_wandb:
-        wandb.init()
-        logger = WandbLogger(project="circle-detection", log_model=True)
-        wandb.log({"Args": json.dumps(vars(args))})
-    else:
-        logger = TensorBoardLogger(args.save_model_path, name="my_model")
-        logger.log_hyperparams(params=vars(args))
+    wandb.init(config=vars(args), project=args.wandb_project_name)
+    args = wandb.config
+    logger = WandbLogger(log_model=True)
 
     # Set seed
     pl.seed_everything(args.seed)

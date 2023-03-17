@@ -99,12 +99,6 @@ class CircleDetectorParser(ArgumentParser):
             help="Fraction of training epoch to run validation",
         )
         parser.add_argument(
-            "--use_wandb",
-            type=bool,
-            default=False,
-            help="Whether to use wandb. Defaults to tensorboard otherwise.",
-        )
-        parser.add_argument(
             "--train_epoch_length",
             type=int,
             default=50000,
@@ -169,4 +163,11 @@ class CircleDetectorParser(ArgumentParser):
             type=float,
             default=0.5,
             help="Noise level used to create the training set",
+        )
+
+        parser.add_argument(
+            "--wandb_project_name",
+            type=str,
+            default=None,
+            help="Name of the wandb project to log to",
         )

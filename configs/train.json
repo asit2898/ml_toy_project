@@ -7,7 +7,6 @@
     "devices": 1,
     "max_epochs": 100,
     "val_check_interval": 0.25,
-    "use_wandb": false,
     "train_epoch_length": 50000,
     "lr": 0.001,
     "config_file": null,
@@ -16,5 +15,6 @@
     "seed": 1048,
     "iou_threshold": 0.5,
     "output_path": "outputs",
-	"noise_level": 0.5
+	"noise_level": 0.5,
+    "wandb_project_name": "circle_detector"
 }

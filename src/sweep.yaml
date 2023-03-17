@@ -1,0 +1,30 @@
+project: circle_detector
+program: train.py
+method: random
+metric:
+  name: val_acc
+  goal: maximize
+parameters:
+  train_batch_size:
+    distribution: categorical
+    values:
+      - 16
+      - 32
+      - 64
+      - 128
+      - 256
+  lr:
+    distribution: log_uniform_values
+    min: 0.000001
+    max: 0.01
+
+command:
+  - ${env}
+  - python3
+  - src/train.py
+  - --config_file 
+  - configs/train.json 
+
+    
+
+
