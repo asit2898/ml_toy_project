@@ -131,9 +131,14 @@ if __name__ == "__main__":
             epoch_length=args.train_epoch_length, noise_level=args.noise_level
         ),
         batch_size=args.train_batch_size,
+        num_workers=args.num_workers,
     )
-    val_dataloader = DataLoader(ValDataSet(), batch_size=args.val_batch_size)
-    test_dataloader = DataLoader(TestDataSet(), batch_size=args.val_batch_size)
+    val_dataloader = DataLoader(
+        ValDataSet(), batch_size=args.val_batch_size, num_workers=args.num_workers
+    )
+    test_dataloader = DataLoader(
+        TestDataSet(), batch_size=args.val_batch_size, num_workers=args.num_workers
+    )
 
     # Create callbacks
 
@@ -162,6 +167,7 @@ if __name__ == "__main__":
         val_check_interval=args.val_check_interval,
         fast_dev_run=args.fast_dev_run,
         precision=64,
+        devices=args.devices,
     )
 
     # Train model
