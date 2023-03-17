@@ -6,24 +6,13 @@ from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
-from models.simple_cnn import SimpleCNN
-from utils.utils import circle_prediction_accuracy
-from utils.cmd_args import CircleDetectorParser
-from data.data_utils import noisy_circle
-
-###
 import wandb
 from datasets import TrainDataSet, ValDataSet, TestDataSet
-import argparse
+import json
 
-
-"""
-TODO: Add the following paramters to the config file:
-    - lr
-    - batch_size
-    - iou threshold
-
-"""
+from models.simple_cnn import SimpleCNN
+from utils.utils import circle_prediction_accuracy
+from utils.parser import CircleDetectorParser
 
 
 class CircleDetector(pl.LightningModule):
@@ -107,39 +96,52 @@ class CircleDetector(pl.LightningModule):
 
 if __name__ == "__main__":
 
+    # Parser with following argument priority
+    # 1st: Command Line Arguments || 2nd: Config file arguments || 3rd: Argparse defaults
+    # This helps keeping track of arguments through config files and allows fast command line experimentation through bash scripts
+
     parser = CircleDetectorParser()
     parser.add_args()
+
     args = parser.parse_args()
+    print(f"Arguments used: \n", args)
 
-    if args.get("config_file") and os.path.exists(args.get("config_file")):
-        pass
+    if args.save_model_path:
+        if not os.path.exists(args.save_model_path):
+            os.makedirs(args.save_model_path)
 
-    pl.seed_everything(seed)
+    if args.output_path:
+        if not os.path.exists(args.output_path):
+            os.makedirs(args.output_path)
 
-    if use_wandb:
+    if args.use_wandb:
         wandb.init()
         logger = WandbLogger(project="circle-detection", log_model=True)
+        logger.experiment.config.update(**vars(args))
     else:
-        logger = TensorBoardLogger(save_model_path, name="my_model")
+        logger = TensorBoardLogger(args.save_model_path, name="my_model")
+        logger.log_hyperparams(params=vars(args))
+
+    # Set seed
+    pl.seed_everything(args.seed)
 
     # Create dataloaders
     train_dataloader = DataLoader(
-        TrainDataSet(epoch_length=train_epoch_length, noise_level=0.5),
-        batch_size=train_batch_size,
+        TrainDataSet(
+            epoch_length=args.train_epoch_length, noise_level=args.noise_level
+        ),
+        batch_size=args.train_batch_size,
     )
-    val_dataloader = DataLoader(ValDataSet(), batch_size=val_batch_size)
-    test_dataloader = DataLoader(TestDataSet(), batch_size=val_batch_size)
-
-    if not os.path.exists(save_model_path):
-        os.makedirs(save_model_path)
+    val_dataloader = DataLoader(ValDataSet(), batch_size=args.val_batch_size)
+    test_dataloader = DataLoader(TestDataSet(), batch_size=args.val_batch_size)
 
     # Create callbacks
 
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
-        dirpath=save_model_path,
+        dirpath=args.save_model_path,
         monitor="val/acc",
         mode="max",
-        save_top_k=save_top_k,
+        save_top_k=args.save_top_k,
         verbose=True,
         save_last=True,
     )
@@ -150,33 +152,33 @@ if __name__ == "__main__":
 
     # Create trainer
 
-    model = CircleDetector(iou_threshold=iou_threshold, lr=lr)
+    model = CircleDetector(iou_threshold=args.iou_threshold, lr=args.lr)
 
     trainer = pl.Trainer(
-        accelerator=accelerator,
+        accelerator=args.accelerator,
         logger=logger,
         callbacks=[checkpoint_callback, early_stop_callback],
-        max_epochs=max_epochs,
-        val_check_interval=val_check_interval,
+        max_epochs=args.max_epochs,
+        val_check_interval=args.val_check_interval,
         fast_dev_run=True,
         precision=64,
     )
 
     # Train model
-    if mode == "train":
+    if args.mode == "train":
         trainer.fit(
             model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader
         )
 
     # Get test metrics on best model
-    if mode == "train":
+    if args.mode == "train":
         best_model_path = checkpoint_callback.best_model_path
 
-    if mode == "test":
-        if model_path == None:
+    if args.mode == "test":
+        if args.model_path == None:
             raise ValueError("model_path not specified")
         else:
-            best_model_path = model_path
+            best_model_path = args.model_path
 
     trained_model = CircleDetector.load_from_checkpoint(best_model_path)
 

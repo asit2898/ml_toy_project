@@ -1,0 +1,20 @@
+{
+    "train_batch_size": 32,
+    "val_batch_size": 32,
+    "save_model_path": "outputs/models",
+    "save_top_k": 1,
+    "accelerator": "cpu",
+    "devices": 1,
+    "max_epochs": 100,
+    "val_check_interval": 0.25,
+    "use_wandb": false,
+    "train_epoch_length": 50000,
+    "lr": 0.001,
+    "config_file": null,
+    "mode": "train",
+    "model_path": null,
+    "seed": 1048,
+    "iou_threshold": 0.5,
+    "output_path": "outputs",
+	"noise_level": 0.5
+}

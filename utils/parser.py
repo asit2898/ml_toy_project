@@ -1,16 +1,47 @@
 from argparse import ArgumentParser
+import sys as _sys
+import os
+import json
 
 
 class CircleDetectorParser(ArgumentParser):
     """
     Class that lists all the arguments to be parsed for the circle detection model.
-    Separate class helps list args into different arguments groups for easy readability
-    example from:https://github.com/facebookresearch/BLINK/blob/main/blink/common/params.py
+    Separate class helps list args into different arguments groups (ex- https://github.com/facebookresearch/BLINK/blob/main/blink/common/params.py)
+    Also overwrite the argparse defauts with the config file values
+    Final priority of arguments:
+    1st: Command Line Arguments || 2nd: Config file arguments || 3rd: Argparse defaults
     """
 
     def __init__(self, description="Arguments for circle detection"):
-        super(self, CircleDetectorParser).__init__(description=description)
+        super().__init__(description=description)
 
+    def parse_args(self) -> dict:
+        """
+        First looks if a config file was provided and overrides the argparse default values
+        Then parses the arguments and returns them as a dictionary
+
+        This helps maintain the following priority of arguments:
+        1st: Command Line Arguments || 2nd: Config file arguments || 3rd: Argparse defaults
+        """
+        user_args = _sys.argv
+
+        try:
+            i = user_args.index("--config_file")
+        except ValueError:
+            i = None
+
+        if i and i + 1 < len(user_args):
+            f = user_args[i + 1]
+            if os.path.exists(f):
+                with open(f, "r") as f:
+                    config_args = json.load(f)
+                self.set_defaults(**config_args)
+
+        args = super().parse_args()
+        return args
+
+    def add_args(self):
         # Add all arguments
         self.add_train_args()
         self.add_other_args()
@@ -31,7 +62,7 @@ class CircleDetectorParser(ArgumentParser):
             "--save_model_path",
             type=str,
             default="outputs/models",
-            help="Path to save the trained model and other outputs",
+            help="Path to save the trained model",
         )
         parser.add_argument(
             "--save_top_k", type=int, default=1, help="Number of best models to save"
@@ -81,6 +112,9 @@ class CircleDetectorParser(ArgumentParser):
         """
         parser = self.add_argument_group("Other Arguments")
 
+        # Do not change the default value of config_file to anything other than None
+        # If you want to use a config file, pass the path to the config file using the --config_file argument
+        # Otherwise the config file will be ignored
         parser.add_argument(
             "--config_file",
             type=str,
@@ -96,20 +130,36 @@ class CircleDetectorParser(ArgumentParser):
         )
 
         parser.add_argument(
-            "--seed",
-            type=int,
-            default=1048,
-            help="Random seed to set all seeds using pytorch_lightning",
-        )
-        parser.add_argument(
             "--model_path",
             type=str,
             default=None,
             help="Path to the saved model. If mode is test, this arguments is needed.",
         )
+
+        parser.add_argument(
+            "--seed",
+            type=int,
+            default=1048,
+            help="Random seed to set all seeds using pytorch_lightning",
+        )
+
         parser.add_argument(
             "--iou_threshold",
             type=float,
             default=0.5,
             help="IOU threshold for accuracy evaluation",
+        )
+
+        parser.add_argument(
+            "--output_path",
+            type=str,
+            default="outputs",
+            help="Path to save all outputs",
+        )
+
+        parser.add_argument(
+            "noise_level",
+            type=float,
+            default=0.5,
+            help="Noise level used to create the training set",
         )
