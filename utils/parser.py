@@ -158,7 +158,7 @@ class CircleDetectorParser(ArgumentParser):
         )
 
         parser.add_argument(
-            "noise_level",
+            "--noise_level",
             type=float,
             default=0.5,
             help="Noise level used to create the training set",
