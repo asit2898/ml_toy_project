@@ -180,6 +180,8 @@ if __name__ == "__main__":
         else:
             best_model_path = args.model_path
 
+    print(f"Loading model from best/given model path: {best_model_path}")
+
     trained_model = CircleDetector.load_from_checkpoint(best_model_path)
 
     results = trainer.test(model=trained_model, dataloaders=test_dataloader)
