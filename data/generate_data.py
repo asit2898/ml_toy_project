@@ -10,13 +10,13 @@ def create_eval_datasets(
     data_save_dir: str, n_valid: int = 20000, n_test: int = 10000
 ) -> None:
     """
-	Training samples are generated on the fly. However for validation and testing we need a fixed dataset
-	These are smaller datasets so should be fine generating at once
+    Training samples are generated on the fly. However for validation and testing we need a fixed dataset
+    These are smaller datasets so should be fine generating at once
 
-	:param data_save_dir: directory to save the datasets to
-	:param n_valid: size of the validation dataset
-	:param n_test: size of the test dataset
-	"""
+    :param data_save_dir: directory to save the datasets to
+    :param n_valid: size of the validation dataset
+    :param n_test: size of the test dataset
+    """
 
     # Create data_save_dir if it does not exist
     if not os.path.exists(data_save_dir):
@@ -53,14 +53,14 @@ def generate_dataset(
     noise_level: float = 0.5,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-	Generate a dataset of specified length made up of noisy circles 
+    Generate a dataset of specified length made up of noisy circles
 
-	:param length: number of samples in the dataset
-	:param img_size: size of the image
-	:param min_radius: minimum radius of the circles
-	:param max_radius: maximum radius of the circles
-	:param noise_level: noise level for the dataset
-	"""
+    :param length: number of samples in the dataset
+    :param img_size: size of the image
+    :param min_radius: minimum radius of the circles
+    :param max_radius: maximum radius of the circles
+    :param noise_level: noise level for the dataset
+    """
 
     # Generate the dataset
     images = []

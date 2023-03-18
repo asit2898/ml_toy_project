@@ -5,10 +5,10 @@ from typing import Tuple
 
 class SimpleCNN(nn.Module):
     """
-	A simple CNN model for single channel images. Like VGG16, but with much lesser parameters and addition of batch normalization.
-	Expecting input of shape (batch_size, 1, 128, 128)
-	output shape: (batch_size, 3)
-	"""
+    A simple CNN model for single channel images. Like VGG16, but with much lesser parameters and addition of batch normalization.
+    Expecting input of shape (batch_size, 1, 128, 128)
+    output shape: (batch_size, 3)
+    """
 
     def __init__(self):
         super(SimpleCNN, self).__init__()
@@ -57,9 +57,9 @@ class SimpleCNN(nn.Module):
 
     def _init_weights(self):
         """
-		Initialize the model's layers' weights. Non bias weights are initialized using kaiming initialization.
-		Bias weights are initialized to zero.
-		"""
+        Initialize the model's layers' weights. Non bias weights are initialized using kaiming initialization.
+        Bias weights are initialized to zero.
+        """
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight)
@@ -68,10 +68,10 @@ class SimpleCNN(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-		Forward pass of the model. 
-		Input Shape: (batch_size, 1, 128, 128)
-		Output shape: (batch_size, 3)
-		"""
+        Forward pass of the model.
+        Input Shape: (batch_size, 1, 128, 128)
+        Output shape: (batch_size, 3)
+        """
         x = self.bn0(x)
 
         x = self.conv1(x)
