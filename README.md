@@ -30,7 +30,7 @@ python3 data/generate_data.py
 ## Evaluating the best model 
 To get the test accuracy using the best model run the following command:
 ```
-python3 src/train.py --accelerator cpu --devices 1 --mode test --model_path best_model.ckpt
+python3 src/train.py --accelerator cpu --devices 1 --mode test --model_path best_model.ckpt --iou_threshold 0.5
 ```
 
 ## Training a new model
@@ -72,11 +72,17 @@ For the best model:
 | Metric | Value|
 |---|---|
 | Train Loss | 40.417 |
-| Validation Loss | 49.806 |
-| Validation Accuracy | 99.115 |
-| Test Accuracy | 99.062 |
+| Validation Loss 0.5 threshold | 49.806 |
+| Validation Accuracy 0.5 threshold| 99.115 |
+| Test Accuracy 0.5 threshold | 99.062 |
+| Test Accuracy 0.75 threshold | 96.196 |
+| Test Accuracy 0.9 threshold | 82.458 |
 </p>
 
 
+
 *Do note that the train, val and test sets are from the exact same image generating probability distribution so the high accuracy numbers are to be expected*
+
+*The model selection was done using iou_threshold for 0.5. Model selection on a different threshold would proably improve test time performance for that threshold*
+
 
