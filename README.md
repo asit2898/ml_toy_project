@@ -61,7 +61,7 @@ This is a VGG net like model with reduced number of parameters and built for a s
 
 The model is trained using Mean Squared Error loss. A sweep was conducted over lr and batch_size (config can be found in `src/sweep.yaml`). Validation accuracy was used to select the best model.
 
-The model is trained for 10 max_epochs and undergoes early stopping based on validation accuracy.
+The model is trained for 10 max_epochs and undergoes early stopping based on validation accuracy. IOU threshold is set to 0.5. 
 
 
 <h2 style="font-size: 24px; font-weight: 400;" align="center"> Results</h2>
