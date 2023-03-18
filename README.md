@@ -1,8 +1,4 @@
-<style>
-  h1 {
-    border-bottom: none;
-  }
-</style>
+
 <h1 align="center">ML toy project: Circle Detector</h1>
 
 ***
