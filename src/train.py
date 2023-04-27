@@ -12,8 +12,8 @@ from datasets import TrainDataSet, ValDataSet, TestDataSet
 import json
 
 from models.simple_cnn import SimpleCNN
-from utils.utils import circle_prediction_accuracy
-from utils.parser import CircleDetectorParser
+from src.utils.utils import circle_prediction_accuracy
+from src.utils.parser import CircleDetectorParser
 
 
 class CircleDetector(pl.LightningModule):
@@ -193,6 +193,8 @@ if __name__ == "__main__":
     print(f"Loading model from best/given model path: {best_model_path}")
 
     trained_model = CircleDetector.load_from_checkpoint(best_model_path)
+
+    # Set iou threshold to user specified value (might be different from training)
     trained_model.iou_threshold = args.iou_threshold
 
     results = trainer.test(model=trained_model, dataloaders=test_dataloader)
